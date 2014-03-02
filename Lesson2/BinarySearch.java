@@ -1,6 +1,6 @@
 public class BinarySearch {
-    // pre: l >= 0 && r <= a.length
-    // post: l <= res < r
+    // pre: l >= 0 && r <= a.length && a[0] < x
+    // post: l < res <= r
     public static int binSearch(int[] a, int x, int l, int r) {
         if (l + 1 == r)
             return r;
