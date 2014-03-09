@@ -3,9 +3,9 @@
 //      || (head > tail && elements[head..elements.length - 1] != null && elements[0..tail - 1] != null)
 //      || (head == tail)
 public class ArrayQueueSingleton {
-    static int size = 0;
-    static int head = 0, tail = 0;
-    static Object[] elements = new Object[5];
+    private static int size = 0;
+    private static int head = 0, tail = 0;
+    private static Object[] elements = new Object[5];
     
     // pre: element != null
     //      0 <= tail < elements.length
@@ -13,7 +13,7 @@ public class ArrayQueueSingleton {
     //       elements[tail] == element
     //       (tail' + 1 < elements.length && tail == tail' + 1) || (tail' + 1 == elements.length && tail == 0) ||
     //                      || (size' + 1 > elements.length && head == 0 && tail == size')
-    static void push(Object element) {
+    public static void push(Object element) {
         assert element != null;
         ensureCapacity(size + 1);
         elements[tail++] = element;
@@ -23,7 +23,7 @@ public class ArrayQueueSingleton {
         ++size;
     }
     
-    static void ensureCapacity(int capacity) {
+    private static void ensureCapacity(int capacity) {
         if (capacity > elements.length) {
             Object[] temp = new Object[2 * capacity];
             for (int i = 0; i < elements.length; i++) {
@@ -40,7 +40,7 @@ public class ArrayQueueSingleton {
     // post: result == elements[head]
     //       size = size' - 1
     //       (head' + 1 < elements.length && head == head' + 1) || head == 0
-    static Object pop() {
+    public static Object pop() {
         assert size > 0;
         
         Object result = elements[head++];
@@ -54,19 +54,19 @@ public class ArrayQueueSingleton {
     // pre: size > 0
     //      0 <= head < elements.length
     // post: result == elements[head]
-    static Object front() {
+    public static Object front() {
         assert size > 0;
         
         return elements[head];
     }
     
     // post: result == size
-    static int size() {
+    public static int size() {
         return size;
     }
     
     // post: result == 0 > 0
-    static boolean isEmpty() {
+    public static boolean isEmpty() {
         return size == 0;
     }
 }
