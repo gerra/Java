@@ -27,7 +27,7 @@ public class ArrayQueueADT {
         if (capacity > queue.elements.length) {
             Object[] temp = new Object[2 * capacity];
             for (int i = 0; i < queue.elements.length; i++) {
-                temp[i] = queue.elements[(queue.head + i) % queue.size];
+                temp[i] = queue.elements[(queue.head + i) % queue.elements.length];
             }
             queue.elements = temp;
             queue.head = 0;

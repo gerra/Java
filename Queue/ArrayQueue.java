@@ -27,7 +27,7 @@ public class ArrayQueue {
         if (capacity > elements.length) {
             Object[] temp = new Object[2 * capacity];
             for (int i = 0; i < elements.length; i++) {
-                temp[i] = elements[(head + i) % size];
+                temp[i] = elements[(head + i) % elements.length];
             }
             elements = temp;
             head = 0;
