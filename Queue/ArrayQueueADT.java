@@ -13,7 +13,7 @@ public class ArrayQueueADT {
     //       elements[tail] == element
     //       (tail' + 1 < elements.length && tail == tail' + 1) || (tail' + 1 == elements.length && tail == 0) ||
     //                      || (size' + 1 > elements.length && head == 0 && tail == size')
-    public static void push(ArrayQueueADT queue, Object element) {
+    public static void enqueue(ArrayQueueADT queue, Object element) {
         assert element != null;
         ensureCapacity(queue, queue.size + 1);
         queue.elements[queue.tail++] = element;
@@ -40,7 +40,7 @@ public class ArrayQueueADT {
     // post: result == elements[head]
     //       size = size' - 1
     //       (head' + 1 < elements.length && head == head' + 1) || head == 0
-    public static Object pop(ArrayQueueADT queue) {
+    public static Object dequeue(ArrayQueueADT queue) {
         assert queue.size > 0;
         
         Object result = queue.elements[queue.head++];
@@ -54,7 +54,7 @@ public class ArrayQueueADT {
     // pre: size > 0
     //      0 <= head < elements.length
     // post: result == elements[head]
-    public static Object front(ArrayQueueADT queue) {
+    public static Object peek(ArrayQueueADT queue) {
         assert queue.size > 0;
         
         return queue.elements[queue.head];

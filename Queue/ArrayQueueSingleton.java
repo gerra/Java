@@ -13,7 +13,7 @@ public class ArrayQueueSingleton {
     //       elements[tail] == element
     //       (tail' + 1 < elements.length && tail == tail' + 1) || (tail' + 1 == elements.length && tail == 0) ||
     //                      || (size' + 1 > elements.length && head == 0 && tail == size')
-    public static void push(Object element) {
+    public static void enqueue(Object element) {
         assert element != null;
         ensureCapacity(size + 1);
         elements[tail++] = element;
@@ -40,7 +40,7 @@ public class ArrayQueueSingleton {
     // post: result == elements[head]
     //       size = size' - 1
     //       (head' + 1 < elements.length && head == head' + 1) || head == 0
-    public static Object pop() {
+    public static Object dequeue() {
         assert size > 0;
         
         Object result = elements[head++];
@@ -54,7 +54,7 @@ public class ArrayQueueSingleton {
     // pre: size > 0
     //      0 <= head < elements.length
     // post: result == elements[head]
-    public static Object front() {
+    public static Object peek() {
         assert size > 0;
         
         return elements[head];

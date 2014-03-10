@@ -5,13 +5,13 @@ public class ADTSum {
             String str[] = args[i].split("\\s+");
             for (int j = 0; j < str.length; ++j) {
                 if (!str[j].isEmpty()) {
-                   ArrayQueueADT.push(queue, str[j]);
+                   ArrayQueueADT.enqueue(queue, str[j]);
                 }
             }
         }
         int sum = 0;
         while (!ArrayQueueADT.isEmpty(queue)) {
-            sum += Integer.parseInt((String) ArrayQueueADT.pop(queue));
+            sum += Integer.parseInt((String) ArrayQueueADT.dequeue(queue));
         }
         System.out.println(sum);
     }

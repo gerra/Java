@@ -1,13 +1,13 @@
 public class QueueTest {
     static void testSingleton() {
         for (int i = 0; i < 10; ++i) {
-            ArrayQueueSingleton.push(i);
+            ArrayQueueSingleton.enqueue(i);
         }
         while (!ArrayQueueSingleton.isEmpty()) {
             System.out.println(
                 ArrayQueueSingleton.size() + " " +
-                ArrayQueueSingleton.front() + " " +
-                ArrayQueueSingleton.pop()
+                ArrayQueueSingleton.peek() + " " +
+                ArrayQueueSingleton.dequeue()
             );
         }
     }
@@ -16,13 +16,13 @@ public class QueueTest {
     static void testADT() {
         ArrayQueueADT queue = new ArrayQueueADT();
         for (int i = 0; i < 10; ++i) {
-            ArrayQueueADT.push(queue, i);
+            ArrayQueueADT.enqueue(queue, i);
         }
         while (!ArrayQueueADT.isEmpty(queue)) {
             System.out.println(
                 ArrayQueueADT.size(queue) + " " +
-                ArrayQueueADT.front(queue) + " " +
-                ArrayQueueADT.pop(queue)
+                ArrayQueueADT.peek(queue) + " " +
+                ArrayQueueADT.dequeue(queue)
             );
         }
     }
@@ -30,13 +30,13 @@ public class QueueTest {
     static void test() {
         ArrayQueue queue = new ArrayQueue();
         for (int i = 0; i < 10; ++i) {
-            queue.push(i);
+            queue.enqueue(i);
         }
         while (!queue.isEmpty()) {
             System.out.println(
                 queue.size() + " " +
-                queue.front() + " " +
-                queue.pop()
+                queue.peek() + " " +
+                queue.dequeue()
             );
         }
     }

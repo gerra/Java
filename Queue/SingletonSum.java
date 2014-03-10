@@ -4,13 +4,13 @@ public class SingletonSum {
             String str[] = args[i].split("\\s+");
             for (int j = 0; j < str.length; ++j) {
                 if (!str[j].isEmpty()) {
-                   ArrayQueueSingleton.push(str[j]);
+                   ArrayQueueSingleton.enqueue(str[j]);
                 }
             }
         }
         int sum = 0;
         while (!ArrayQueueSingleton.isEmpty()) {
-            sum += Integer.parseInt((String) ArrayQueueSingleton.pop());
+            sum += Integer.parseInt((String) ArrayQueueSingleton.dequeue());
         }
         System.out.println(sum);
     }
