@@ -1,18 +1,15 @@
 // inv: size >= 0
-//      (head < tail && elements[head..tail - 1] != null) ||
-//      || (head > tail && elements[head..elements.length - 1] != null && elements[0..tail - 1] != null)
-//      || (head == tail)
+//      elements[head..tail - 1] != null
 public class ArrayDeque {
     private int size = 0;
     private int head = 0, tail = 0;
     private Object[] elements = new Object[5];
     
     // pre: element != null
-    //      0 <= tail < elements.length
     // post: size = size' + 1
-    //       elements[tail] == element
-    //       (tail' + 1 < elements.length && tail == tail' + 1) || (tail' + 1 == elements.length && tail == 0) ||
-    //                      || (size' + 1 > elements.length && head == 0 && tail == size')
+    //       tail = tail' + 1
+    //       elements[tail' + 1] == element
+    //       elements[head..tail'] = elements'[head..tail']
     public void addLast(Object element) {
         assert element != null;
         ensureCapacity(size + 1);
@@ -24,11 +21,10 @@ public class ArrayDeque {
     }
     
     // pre: element != null
-    //      0 <= tail < elements.length
     // post: size = size' + 1
-    //       elements[tail] == element
-    //       (tail' + 1 < elements.length && tail == tail' + 1) || (tail' + 1 == elements.length && tail == 0) ||
-    //                      || (size' + 1 > elements.length && head == 0 && tail == size')
+    //       head = head' - 1
+    //       elements[head' - 1] == element
+    //       elements[head'..tail] = elements'[head'..tail]
     public void addFirst(Object element) {
         assert element != null;
         ensureCapacity(size + 1);
@@ -53,10 +49,9 @@ public class ArrayDeque {
     }
     
     // pre: size > 0
-    //      0 <= head < elements.length
     // post: result == elements[head]
     //       size = size' - 1
-    //       (head' + 1 < elements.length && head == head' + 1) || head == 0
+    //       head = head' + 1
     public Object removeFirst() {
         assert size > 0;
         Object result = elements[head++];
@@ -66,10 +61,9 @@ public class ArrayDeque {
     }
     
     // pre: size > 0
-    //      0 <= tail < elements.length
-    // post: result == elements[(tail - 1) %= elements.length;]
+    // post: result = elements[tail - 1]
     //       size = size' - 1
-    //       (tail' - 1 > 0 && tail == tail' - 1) || tail == elements.length - 1
+    //       tail = tail' - 1
     public Object removeLast() {
         assert size > 0;
         --tail;
@@ -82,7 +76,6 @@ public class ArrayDeque {
     }
     
     // pre: size > 0
-    //      0 <= head < elements.length
     // post: result == elements[head]
     public Object peekFirst() {
         assert size > 0;
@@ -90,8 +83,7 @@ public class ArrayDeque {
     }
     
     // pre: size > 0
-    //      0 <= tail < elements.length
-    // post: elements[(tail - 1) % elements.length]
+    // post: result == elements[tail - 1]
     public Object peekLast() {
         assert size > 0;
         int position = tail - 1;
@@ -106,7 +98,7 @@ public class ArrayDeque {
         return size;
     }
     
-    // post: result == 0 > 0
+    // post: result == (size == 0 > 0)
     public boolean isEmpty() {
         return size == 0;
     }
