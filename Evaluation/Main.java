@@ -7,15 +7,16 @@ public class Main {
                   new Subtract (
                       new Multiply(
                           new Variable("x"),
-                          new Variable("x") 
+                          new Variable("y") 
                       ),
                       new Multiply(
                           new Const(2),
-                          new Variable("x")
+                          new Variable("z")
                       )
                   ), 
                   new Const(1)
-              ).evaluate(x);
+              ).evaluate(x, x, x);
         System.out.println(res);
+        
     }
 }

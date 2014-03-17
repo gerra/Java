@@ -1,20 +1,14 @@
-public abstract class BinaryOperation implements GValue {
-    GValue first, second;
+public abstract class BinaryOperation implements Expression3 {
+    Expression3 first, second;
     
-    public BinaryOperation(GValue f, GValue s) {
+    public BinaryOperation(Expression3 f, Expression3 s) {
         assert f != null;
         assert s != null;
         first = f;
         second = s;
     }
         
-    public final double evaluate(double varValue) {
-        initialize(varValue);
-        return getValue();
-    }
-    
-    public final void initialize(double varValue) {
-        first.initialize(varValue);
-        second.initialize(varValue);
+    public double evaluate(double x, double y, double z) {
+        return evaluate(x, y, z);
     }
 }
