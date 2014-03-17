@@ -7,8 +7,4 @@ public abstract class BinaryOperation implements Expression3 {
         first = f;
         second = s;
     }
-        
-    public double evaluate(double x, double y, double z) {
-        return evaluate(x, y, z);
-    }
 }
