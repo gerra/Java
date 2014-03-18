@@ -1,17 +1,17 @@
 public class Variable implements Expression3 {
-    String name;
+    private String name;
     
-    Variable (String n) {
-        assert n != null;
-        name = n;
+    public Variable (String name) {
+        assert name != null;
+        this.name = name;
     }
     
     public double evaluate(double x, double y, double z) {
-        if (name == "x") {
+        if (name.equals("x")) {
             return x;
-        } else if (name == "y") {
+        } else if (name.equals("y")) {
             return y;
-        } else if (name == "z") {
+        } else if (name.equals("z")) {
             return z;
         } else {
             return 0.0;
