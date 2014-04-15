@@ -6,7 +6,7 @@ public class Variable implements Expression3 {
         this.name = name;
     }
     
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(int x, int y, int z) throws MyCalcException {
         if (name.equals("x")) {
             return x;
         } else if (name.equals("y")) {

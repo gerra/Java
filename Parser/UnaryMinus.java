@@ -3,7 +3,11 @@ public class UnaryMinus extends UnaryOperation {
         super(exp);
     }
     
-    public int evaluate(int x, int y, int z) {
-        return -exp.evaluate(x, y, z);
+    public int evaluate(int x, int y, int z) throws MyCalcException  {
+        int res = exp.evaluate(x, y, z);
+        if (res == Integer.MIN_VALUE) {
+            throw new OverflowException("overflow");
+        }
+        return -res;
     }
 }

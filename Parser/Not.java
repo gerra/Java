@@ -3,7 +3,7 @@ public class Not extends UnaryOperation {
         super(exp);
     }
     
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(int x, int y, int z) throws MyCalcException  {
         return ~exp.evaluate(x, y, z);
     }
 }

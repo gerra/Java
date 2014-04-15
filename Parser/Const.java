@@ -5,7 +5,7 @@ public class Const implements Expression3 {
         this.value = value;
     }
 
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(int x, int y, int z) throws MyCalcException {
         return value;
     }
 }

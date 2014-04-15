@@ -3,5 +3,5 @@
  * @version $$Id$$
  */
 public interface Expression3 {
-    int evaluate(int x, int y, int z);
+    int evaluate(int x, int y, int z) throws MyCalcException;
 }

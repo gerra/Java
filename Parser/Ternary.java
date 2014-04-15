@@ -3,7 +3,7 @@ public class Ternary extends TernaryOperation {
         super(f, s, t);
     }
     
-    public int evaluate(int x, int y, int z) {
+    public int evaluate(int x, int y, int z) throws MyCalcException {
         return first.evaluate(x, y, z) != 0 ? second.evaluate(x, y, z) : third.evaluate(x, y, z);
     }
 }
