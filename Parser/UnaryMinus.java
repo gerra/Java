@@ -4,10 +4,11 @@ public class UnaryMinus extends UnaryOperation {
     }
     
     public int evaluate(int x, int y, int z) throws MyCalcException  {
-        int res = exp.evaluate(x, y, z);
-        if (res == Integer.MIN_VALUE) {
+        int e = exp.evaluate(x, y, z);
+        double res = -(double)e;
+        if (res > Integer.MAX_VALUE || res < Integer.MIN_VALUE) {
             throw new OverflowException("overflow");
         }
-        return -res;
+        return (int)res;
     }
 }

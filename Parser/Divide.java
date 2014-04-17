@@ -8,6 +8,11 @@ public class Divide extends BinaryOperation {
         if (divident == 0) {
             throw new DBZException("division by zero");
         }
-        return first.evaluate(x, y, z) / divident;
+        int f = first.evaluate(x, y, z);
+        double res = (double)f / (double)divident;
+        if (res < Integer.MIN_VALUE || res > Integer.MAX_VALUE) {
+            throw new OverflowException("overflow");
+        }
+        return (int)res;
     }
 }
