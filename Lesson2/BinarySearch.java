@@ -4,14 +4,14 @@ public class BinarySearch {
     public static int binSearch(int[] a, int x, int l, int r) {
         if (l == r) {
             return r;
-		}
+        }
         int m = (l + r) / 2;
         if (a[m] >= x) {
             return binSearch(a, x, l, m);
-		}
+        }
         else {
             return binSearch(a, x, m + 1, r);
-		}
+        }
     }
     
     // pre: 
@@ -24,10 +24,10 @@ public class BinarySearch {
             int m = (l + r) / 2;
             if (a[m] >= x) {
                 r = m;
-			}
+            }
             else {
                 l = m + 1;
-			}
+            }
         }
         return r;
     }
