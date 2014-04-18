@@ -1,6 +1,6 @@
-// expr <- factor <- powerTerm <- brackets <- expr ...
-//                     |    /
-//                  operand
+// expr <- factor <- powerFactor <- brackets <- expr ...
+//                     \    /  
+//                       <-
 public class ExpressionParser {
     static String s;
     static int last; 
