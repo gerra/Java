@@ -1,14 +1,10 @@
-public class UnaryMinus extends UnaryOperation {
-    UnaryMinus(Expression3 exp) {
+public class UnaryMinus<T extends Number> extends UnaryOperation<T> {
+    public UnaryMinus(Expression3<T> exp) {
         super(exp);
     }
     
-    public int evaluate(int x, int y, int z) throws MyCalcException  {
-        int e = exp.evaluate(x, y, z);
-        double res = -(double)e;
-        if (res > Integer.MAX_VALUE || res < Integer.MIN_VALUE) {
-            throw new OverflowException("overflow");
-        }
-        return (int)res;
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
+        T e = exp.evaluate(x, y, z, calc);
+        return calc.neg(e);
     }
 }

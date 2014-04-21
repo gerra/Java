@@ -1,4 +1,4 @@
-public class Variable implements Expression3 {
+public class Variable<T extends Number> implements Expression3<T> {
     private String name;
     
     public Variable (String name) {
@@ -6,7 +6,7 @@ public class Variable implements Expression3 {
         this.name = name;
     }
     
-    public int evaluate(int x, int y, int z) throws MyCalcException {
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
         if (name.equals("x")) {
             return x;
         } else if (name.equals("y")) {
@@ -14,7 +14,7 @@ public class Variable implements Expression3 {
         } else if (name.equals("z")) {
             return z;
         } else {
-            return 0;
+            throw new MyCalcException("Unknown variable");
         }
     }
 }

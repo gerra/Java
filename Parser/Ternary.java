@@ -1,9 +1,12 @@
-public class Ternary extends TernaryOperation {
-    public Ternary(Expression3 f, Expression3 s, Expression3 t) {
+public class Ternary<T extends Number> extends TernaryOperation<T> {
+    public Ternary(Expression3<T> f, Expression3<T> s, Expression3<T> t) {
         super(f, s, t);
     }
     
-    public int evaluate(int x, int y, int z) throws MyCalcException {
-        return first.evaluate(x, y, z) != 0 ? second.evaluate(x, y, z) : third.evaluate(x, y, z);
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
+        T f = first.evaluate(x, y, z, calc);
+        T s = second.evaluate(x, y, z, calc);
+        T t = third.evaluate(x, y, z, calc);
+        return calc.ter(f, s, t);
     }
 }

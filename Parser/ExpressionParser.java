@@ -93,33 +93,6 @@ public class ExpressionParser {
         }
         return res;
     }
-
-    /*static Expression3 powerFactor() throws ParserException {
-        Expression3 res = brackets();
-        deleteSpaces();
-        while (last < s.length()) {
-            switch (s.charAt(last)) {
-                case '^':
-                    last++;
-                    res = new Power(res, brackets());
-                    break;
-                default:
-                    char c = s.charAt(last);
-                    if (c == '+' || c == '-' || c == '*' || c == '/' || (c == ')' && balance > 0)) {
-                        return res;
-                    }
-                    String error = "Parsing error of " + '"' + s + '"' + " on position " + last;
-                    if (c == ')' && balance <= 0) {
-                        error += ": '(' not found";
-                    } else {
-                        error += ": unknown operation " + c;
-                    }
-                    throw new ParserException(error);
-            }
-            deleteSpaces();
-        }
-        return res;
-    }*/
     
     static Expression3 powerFactor() throws ParserException {
         Expression3 res = brackets();
@@ -197,6 +170,8 @@ public class ExpressionParser {
     }
     
     public static void main(String args[]) {
+       // BigInteger a;
+        
         int res = 0;
         try {
             Expression3 ex = parse(args[0]);

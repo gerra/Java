@@ -1,11 +1,11 @@
-public class Const implements Expression3 {
-    private final int value;
+public class Const<T extends Number> implements Expression3<T> {
+    private final T value;
     
-    public Const(int value) {
+    public Const(T value) {
         this.value = value;
     }
 
-    public int evaluate(int x, int y, int z) throws MyCalcException {
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
         return value;
     }
 }
