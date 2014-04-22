@@ -1,82 +1,91 @@
 // expr <- factor <- powerFactor <- brackets <- expr ...
 //                     \    /  
 //                       <-
-public class ExpressionParser {
-    static String s;
-    static int last; 
-    static int balance;
+public class ExpressionParser<T extends Number> {
+    private static String s;
+    private static int last; 
+    private static int balance;
+    public Arithmetic<T> calc;
     
-    static void deleteSpaces() {
+    public ExpressionParser(Arithmetic<T> calc) {
+        this.calc = calc;
+    }
+    
+    private void deleteSpaces() {
         while (last < s.length() && Character.isWhitespace(s.charAt(last))) {
             last++;
         }
     }
     
-    static int getNumber(int sign) throws ParserException {
+    private T getNumber(int sign) throws ParserException {
         char c = s.charAt(last);
-        double val = 0;
-        while (c >= '0' && c <= '9' && last < s.length()) {
-            val = val * 10 + sign * (c - '0');
-            if (val < Integer.MIN_VALUE || val > Integer.MAX_VALUE) {
-                throw new ParserException("too big number");
-            }
+        int st = last;
+        while (c >= '0' && c <= '9' || c == '.' || c == 'E' || c == '-') {
             last++;
             if (last == s.length()) {
                 break;
             }
             c = s.charAt(last);
         }
-        return (int)val;
+        String number = s.substring(st, last);
+        if (sign == -1) {
+            number = "-" + number;
+        }
+        
+        return calc.getNumber(number);
     }
     
-    static Expression3 operand() throws ParserException {
+    private Expression3<T> operand() throws ParserException {
         deleteSpaces();
         if (last == s.length()) {
             throw new ParserException("Parsing error of " + '"' + s + '"' + " on position " + last + ": expected operand, found null");
         }
-        
         if (s.charAt(last) == '-') {
             last++;
             deleteSpaces();
+            if (last == s.length()) {
+                throw new ParserException("empty unary minus");
+            }
+            deleteSpaces();
             char c = s.charAt(last);
             if (c >= '0' && c <= '9') {
-                return new Const(getNumber(-1));
+                return new Const<T>(getNumber(-1));
             }
-            return new UnaryMinus(brackets());
+            return new UnaryMinus<T>(brackets());
         }
         
         if (s.charAt(last) == '~') {
             last++;
-            return new Not(brackets());
+            return new Not<T>(brackets());
         }
         
         if (last + 2 < s.length() && s.substring(last, last + 3).equals("abs")) {
             last += 3;
-            return new Abs(brackets());
+            return new Abs<T>(brackets());
         }
         
         if (last + 1 < s.length() && s.substring(last, last + 2).equals("lb")) {
             last += 2;
-            return new Log2(brackets());
+            return new Log2<T>(brackets());
         }
         
-        Expression3 res;
+        Expression3<T> res;
         char c = s.charAt(last);
         if (c >= '0' && c <= '9') {
-            res = new Const(getNumber(1));
+            res = new Const<T>(getNumber(1));
         } else if (c >= 'x' && c <= 'z') {
             String name = "";
             name += c;
             last++;
-            res = new Variable(name);
+            res = new Variable<T>(name);
         } else {
             throw new ParserException("Parsing error of " + '"' + s + '"' + " on position " + last + ": unknown symbol '" + c + "' of operand");
         }
         return res;
     }
     
-    static Expression3 brackets() throws ParserException {
-        Expression3 res;
+    private Expression3<T> brackets() throws ParserException {
+        Expression3<T> res;
         deleteSpaces();
         if (last < s.length() && s.charAt(last) == '(') {
             last++;
@@ -94,13 +103,13 @@ public class ExpressionParser {
         return res;
     }
     
-    static Expression3 powerFactor() throws ParserException {
-        Expression3 res = brackets();
+    private Expression3<T> powerFactor() throws ParserException {
+        Expression3<T> res = brackets();
         deleteSpaces();
         if (last < s.length()) {
             if (s.charAt(last) == '^') {
                 last++;
-                res = new Power(res, powerFactor());
+                res = new Power<T>(res, powerFactor());
                 return res;
             } else {
                 char c = s.charAt(last);
@@ -120,18 +129,18 @@ public class ExpressionParser {
         }
     }
     
-    static Expression3 factor() throws ParserException {
-        Expression3 res = powerFactor();
+    private Expression3<T> factor() throws ParserException {
+        Expression3<T> res = powerFactor();
         deleteSpaces();
         while (last < s.length()) {
             switch (s.charAt(last)) {
                 case '*':
                     last++;
-                    res = new Multiply(res, powerFactor());
+                    res = new Multiply<T>(res, powerFactor());
                     break;
                 case '/':
                     last++;
-                    res = new Divide(res, powerFactor());
+                    res = new Divide<T>(res, powerFactor());
                     break;
                 default:
                     return res;
@@ -141,18 +150,18 @@ public class ExpressionParser {
         return res;
     }
     
-    static Expression3 expr() throws ParserException {
-        Expression3 res = factor();
+    private Expression3<T> expr() throws ParserException {
+        Expression3<T> res = factor();
         deleteSpaces();
         while (last < s.length()) {
             switch (s.charAt(last)) {
                 case '+':
                     last++;
-                    res = new Add(res, factor());
+                    res = new Add<T>(res, factor());
                     break;
                 case '-':
                     last++;
-                    res = new Subtract(res, factor());
+                    res = new Subtract<T>(res, factor());
                     break;
                 default:
                     return res;
@@ -162,27 +171,21 @@ public class ExpressionParser {
         return res;
     }
     
-    static Expression3 parse(String input) throws ParserException {
+    public Expression3<T> parse(String input) throws ParserException {
         balance = 0;
         s = input;
         last = 0;
         return expr();
     }
     
-    public static void main(String args[]) {
-       // BigInteger a;
-        
-        int res = 0;
+    public T evaluate(String input, String x, String y, String z) throws MyCalcException, ParserException {
         try {
-            Expression3 ex = parse(args[0]);
-            if (ex != null) {
-                res = ex.evaluate(1, 2, 0);
-                System.out.println(res);
-            }
+            Expression3<T> exp = parse(input);
+            return exp.evaluate(calc.getNumber(x), calc.getNumber(y), calc.getNumber(z), calc);
         } catch (ParserException e) {
-            System.err.println(e.getMessage());
+            throw e;
         } catch (MyCalcException e) {
-            System.err.println(e.getMessage());
+            throw e;
         }
     }
 }

@@ -1,14 +1,10 @@
-public class Abs extends UnaryOperation {
-    Abs(Expression3 exp) {
+public class Abs<T extends Number> extends UnaryOperation<T> {
+    Abs(Expression3<T> exp) {
         super(exp);
     }
     
-    public int evaluate(int x, int y, int z) throws MyCalcException {
-        int e = exp.evaluate(x, y, z);
-        double res = (e < 0 ? -(double)e : (double)e);
-        if (res < Integer.MIN_VALUE || res > Integer.MAX_VALUE) {
-            throw new OverflowException("overflow");
-        }
-        return (int)res;
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
+        T e = exp.evaluate(x, y, z, calc);
+        return calc.abs(e);
     }
 }

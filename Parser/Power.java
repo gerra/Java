@@ -1,22 +1,11 @@
-public class Power extends BinaryOperation {
-    Power(Expression3 first, Expression3 second) {
+public class Power<T extends Number> extends BinaryOperation<T> {
+    Power(Expression3<T> first, Expression3<T> second) {
         super(first, second);
     }
     
-    public int evaluate(int x, int y, int z) throws MyCalcException {
-        int f = first.evaluate(x, y, z);
-        int s = second.evaluate(x, y, z);
-    
-        if (s < 0) {
-            throw new NegativePower("negative power");
-        }
-    
-        double res = Math.pow((double)f, (double)s);
-        
-        if (res > (double)Integer.MAX_VALUE || res < (double)Integer.MIN_VALUE) {
-            throw new OverflowException("overflow");
-        }
-         
-        return (int)res;
+    public T evaluate(T x, T y, T z, Arithmetic<T> calc) throws MyCalcException {
+        T f = first.evaluate(x, y, z, calc);
+        T s = second.evaluate(x, y, z, calc);
+        return calc.pow(f, s);
     }
 }
