@@ -78,4 +78,8 @@ public class DoubleArithmetic implements Arithmetic<Double> {
             throw new ParserException("wrong number");
         }
     }
+    
+    //public Double sin(Double x) {
+    //    return Double.valueOf(Math.sin(x.doubleValue()));
+    //}
 }

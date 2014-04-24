@@ -12,16 +12,6 @@ public class GenericParser {
             parser = new ExpressionParser<Double>(new DoubleArithmetic());
         }
         
-        for (int x = -100; x <= 100; x++) {
-                for (int y = -100; y <= 100; y++) {
-                    try {
-                        System.out.println(parser.evaluate(args[1], "" + x, "" + y, "3"));
-                    } catch(ParserException e) {
-                        System.out.println(e.getMessage());
-                    } catch (MyCalcException e) {
-                        System.out.println("error");
-                    }
-                }
-        }
+        parser.check(args[1]);
     }
 }

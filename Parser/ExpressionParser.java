@@ -64,6 +64,15 @@ public class ExpressionParser<T extends Number> {
             return new Abs<T>(brackets());
         }
         
+        if (last + 2 < s.length() && s.substring(last, last + 3).equals("sin")) {
+            last += 3;
+            T a;
+            if (a instanceof Double)
+                return new Sin(brackets());
+            else
+                throw new ParserException("Not double");
+        }
+        
         if (last + 1 < s.length() && s.substring(last, last + 2).equals("lb")) {
             last += 2;
             return new Log2<T>(brackets());
@@ -178,14 +187,28 @@ public class ExpressionParser<T extends Number> {
         return expr();
     }
     
-    public T evaluate(String input, String x, String y, String z) throws MyCalcException, ParserException {
+    public T evaluate(String s, String x, String y, String z) throws MyCalcException, ParserException {
+        Expression3<T> exp = parse(s);
+        return exp.evaluate(calc.getNumber(x), calc.getNumber(y), calc.getNumber(z), calc);
+    }
+    
+    public void check(String s) {
+        Expression3<T> exp = null;
         try {
-            Expression3<T> exp = parse(input);
-            return exp.evaluate(calc.getNumber(x), calc.getNumber(y), calc.getNumber(z), calc);
-        } catch (ParserException e) {
-            throw e;
-        } catch (MyCalcException e) {
-            throw e;
+            exp = parse(s);
+        } catch(ParserException e) {
+            System.err.println(e.getMessage());
+        }
+        for (int x = -100; x <= 100; x++) {
+            for (int y = -100; y <= 100; y++) {
+                try {
+                    System.out.println(exp.evaluate(calc.getNumber("" + x), calc.getNumber("" + y), calc.getNumber("3"), calc));
+                } catch(ParserException e) {
+                    System.out.println(e.getMessage());
+                } catch (MyCalcException e) {
+                    System.out.println("error");
+                }
+            }
         }
     }
 }
