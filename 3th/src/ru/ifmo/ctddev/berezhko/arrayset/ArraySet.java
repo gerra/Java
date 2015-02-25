@@ -1,5 +1,6 @@
 package ru.ifmo.ctddev.berezhko.arrayset;
 
+
 import java.util.*;
 
 /**
@@ -41,11 +42,15 @@ public class ArraySet<E> implements NavigableSet<E>  {
         this(new ArrayList<E>(), null);
     }
 
+    public ArraySet(Comparator<? super E> comparator) {
+        this(new ArrayList<E>(), comparator);
+    }
+
     // -1  true: <=
     // -1 false:  <
     //  1 false:  >
     //  1  true: >=
-    public E binSearch(E x, int signType, boolean canNull) {
+    private int binSearchInd(E x, int signType, boolean canNull) {
         int l = 0;
         int r = size();
         int res = -1;
@@ -69,10 +74,19 @@ public class ArraySet<E> implements NavigableSet<E>  {
                 }
             }
         }
-        try {
-            return set.get(res);
-        } catch (IndexOutOfBoundsException e) {
+        if (res < 0 || res >= size()) {
+            res = -1;
+        }
+        return res;
+    }
+
+
+    public E binSearch(E x, int signType, boolean canNull) {
+        int ind = binSearchInd(x, signType, canNull);
+        if (ind == -1) {
             return null;
+        } else {
+            return set.get(ind);
         }
     }
 
@@ -118,14 +132,16 @@ public class ArraySet<E> implements NavigableSet<E>  {
     @Override
     public Iterator<E> iterator() {
         return new Iterator<E>() {
+            private int currentIndex = 0;
+
             @Override
             public boolean hasNext() {
-                return false;
+                return currentIndex + 1 < size();
             }
 
             @Override
             public E next() {
-                return null;
+                return set.get(currentIndex++);
             }
         };
     }
@@ -152,27 +168,49 @@ public class ArraySet<E> implements NavigableSet<E>  {
 
     @Override
     public NavigableSet<E> descendingSet() {
-        return null;
+        ArrayList<E> descendingSet = new ArrayList<>(set);
+        Collections.reverse(descendingSet);
+        return new ArraySet<>(descendingSet, realComparator);
     }
 
     @Override
     public Iterator<E> descendingIterator() {
-        return null;
+        return descendingSet().iterator();
     }
 
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-        return null;
+        if (size() == 0) {
+            return new ArraySet<>(realComparator);
+        }
+
+        int from = binSearchInd(fromElement, 1, fromInclusive);
+        int to = binSearchInd(toElement, -1, toInclusive);
+
+        if (from == -1 || to == -1 || from > to) {
+            return new ArraySet<>(realComparator);
+        }
+        ArrayList<E> subList = new ArrayList<>();
+        for (int i = from; i <= to; i++) {
+            subList.add(set.get(i));
+        }
+        return new ArraySet<>(subList, realComparator);
     }
 
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-        return null;
+        if (size() == 0) {
+            return new ArraySet<>(realComparator);
+        }
+        return subSet(first(), true, toElement, inclusive);
     }
 
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-        return null;
+        if (size() == 0) {
+            return new ArraySet<>(realComparator);
+        }
+        return subSet(fromElement, inclusive, last(), true);
     }
 
     @Override
@@ -182,17 +220,17 @@ public class ArraySet<E> implements NavigableSet<E>  {
 
     @Override
     public SortedSet<E> subSet(E fromElement, E toElement) {
-        return null;
+        return subSet(fromElement, true, toElement, false);
     }
 
     @Override
     public SortedSet<E> headSet(E toElement) {
-        return null;
+        return headSet(toElement, false);
     }
 
     @Override
     public SortedSet<E> tailSet(E fromElement) {
-        return null;
+        return tailSet(fromElement, true);
     }
 
     @Override
