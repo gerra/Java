@@ -74,7 +74,7 @@ public class ArraySet<E> implements NavigableSet<E>  {
                 }
             }
         }
-        if (res < 0 || res >= size()) {
+        if (res == size()) {
             res = -1;
         }
         return res;
@@ -190,7 +190,7 @@ public class ArraySet<E> implements NavigableSet<E>  {
         if (from == -1 || to == -1 || from > to) {
             return new ArraySet<>(realComparator);
         }
-        ArrayList<E> subList = new ArrayList<>();
+        ArrayList<E> subList = new ArrayList<>(to-from+1);
         for (int i = from; i <= to; i++) {
             subList.add(set.get(i));
         }
