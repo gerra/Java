@@ -10,7 +10,7 @@ import java.util.*;
 
 public class ArraySet<E> implements NavigableSet<E>  {
 
-    private ArrayList<E> set;
+    private List<E> set;
     private Comparator<? super E> realComparator;
     private Comparator<? super E> comparator;
 
@@ -44,6 +44,16 @@ public class ArraySet<E> implements NavigableSet<E>  {
 
     public ArraySet(Comparator<? super E> comparator) {
         this(new ArrayList<E>(), comparator);
+    }
+
+    private ArraySet(List<E> set, Comparator<? super E> comparator) {
+        this.set = set;
+        this.comparator = comparator != null ? comparator : new Comparator<E>() {
+            @Override
+            public int compare(E o1, E o2) {
+                return ((Comparable)o1).compareTo(o2);
+            }
+        };
     }
 
     // -1  true: <=
@@ -190,11 +200,7 @@ public class ArraySet<E> implements NavigableSet<E>  {
         if (from == -1 || to == -1 || from > to) {
             return new ArraySet<>(realComparator);
         }
-        ArrayList<E> subList = new ArrayList<>(to-from+1);
-        for (int i = from; i <= to; i++) {
-            subList.add(set.get(i));
-        }
-        return new ArraySet<>(subList, realComparator);
+        return new ArraySet<>(set.subList(from, to+1), realComparator);
     }
 
     @Override
