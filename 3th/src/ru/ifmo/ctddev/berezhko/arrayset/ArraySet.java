@@ -9,11 +9,11 @@ import java.util.*;
  * Created by german on 25.02.15.
  */
 
-
 public class ArraySet<E> extends AbstractSet<E>
         implements NavigableSet<E>  {
 
     private List<E> set;
+    private boolean notFailComparator = false;
     private Comparator<? super E> comparator;
 
 
@@ -21,12 +21,26 @@ public class ArraySet<E> extends AbstractSet<E>
         this.set = new ArrayList<>(set);
         this.comparator = comparator;
 
+        if (this.comparator == null) {
+            notFailComparator = true;
+            this.comparator = new Comparator<E>() {
+                @Override
+                public int compare(E o1, E o2) {
+                    if (o1 == null) {
+                        return o2 == null ? 0 : -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    return ((Comparable)o1).compareTo(o2);
+                }
+            };
+        }
+
         Collections.sort(this.set, comparator);
         List<E> unique = new ArrayList<>();
         for (E e : this.set) {
-            if (unique.size() == 0
-                    || comparator == null && ((Comparable)unique.get(unique.size() - 1)).compareTo(e) != 0
-                    || comparator.compare(unique.get(unique.size() - 1), e) != 0) {
+            if (unique.size() == 0 || this.comparator.compare(unique.get(unique.size() - 1), e) != 0) {
                 unique.add(e);
             }
         }
@@ -111,9 +125,6 @@ public class ArraySet<E> extends AbstractSet<E>
 
     @Override
     public boolean contains(Object o) {
-        if (o == null) {
-            return false;
-        }
         return Collections.binarySearch(set, (E)o, comparator) >= 0;
     }
 
@@ -131,18 +142,13 @@ public class ArraySet<E> extends AbstractSet<E>
             public E next() {
                 return it.next();
             }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
         };
     }
 
     @Override
     public NavigableSet<E> descendingSet() {
-        List<E> descendingSet = new ReversedArrayList<>((ArrayList)set);
-        return new ArraySet<>(descendingSet, comparator != null ? comparator.reversed() : null);
+        List<E> descendingSet = new ReversedArrayList<>(set);
+        return new ArraySet<>(descendingSet, comparator.reversed());
     }
 
     @Override
@@ -184,7 +190,7 @@ public class ArraySet<E> extends AbstractSet<E>
     @Nullable
     @Override
     public Comparator<? super E> comparator() {
-        return comparator;
+        return notFailComparator ? null : comparator;
     }
 
     @Override

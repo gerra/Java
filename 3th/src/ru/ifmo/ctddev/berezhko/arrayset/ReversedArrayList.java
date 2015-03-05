@@ -1,22 +1,28 @@
 package ru.ifmo.ctddev.berezhko.arrayset;
 
-import java.util.ArrayList;
+import java.util.AbstractList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
  * Created by root on 05.03.15.
  */
-public class ReversedArrayList<E> extends ArrayList<E> {
-    private ArrayList<E> forwardList;
+public class ReversedArrayList<E> extends AbstractList<E> {
+    private List<E> forwardList;
 
-    public ReversedArrayList(ArrayList<E> forwardList) {
+    public ReversedArrayList(List<E> forwardList) {
         this.forwardList = forwardList;
     }
 
     @Override
+    public int size() {
+        return forwardList.size();
+    }
+
+    @Override
     public E get(int index) {
-        return forwardList.get(forwardList.size() - index - 1);
+        return forwardList.get(size() - index - 1);
     }
 
     @Override
@@ -26,12 +32,12 @@ public class ReversedArrayList<E> extends ArrayList<E> {
 
             @Override
             public boolean hasNext() {
-                return it != forwardList.size();
+                return it != size();
             }
 
             @Override
             public E next() {
-                if (it >= forwardList.size()) {
+                if (it >= size()) {
                     throw new NoSuchElementException();
                 }
                 return get(it++);
