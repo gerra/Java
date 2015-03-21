@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm -rf doc
+mkdir doc
+javadoc src/ru/ifmo/ctddev/berezhko/implementor/Implementor.java -classpath "ImplementorTest.jar" -d doc -private -linkoffline http://docs.oracle.com/javase/8/docs/api/ http://docs.oracle.com/javase/8/docs/api/
