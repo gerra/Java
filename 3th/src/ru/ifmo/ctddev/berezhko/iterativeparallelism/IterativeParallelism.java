@@ -85,9 +85,7 @@ public class IterativeParallelism implements ListIP {
         });
 
         List<T> result = new ArrayList<>();
-        for (List<T> subList : localResults) {
-            result.addAll(subList);
-        }
+        localResults.forEach(result::addAll);
         return result;
     }
 
@@ -101,9 +99,7 @@ public class IterativeParallelism implements ListIP {
         });
 
         List<U> result = new ArrayList<>();
-        for (List<U> subList : localResults) {
-            result.addAll(subList);
-        }
+        localResults.forEach(result::addAll);
         return result;
     }
 
