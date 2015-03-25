@@ -61,21 +61,18 @@ public class IterativeParallelism implements ListIP {
 
     @Override
     public String concat(int cnt, List<?> list) throws InterruptedException {
-        List<String> localResults = makeListWorkers(cnt, list, new Function<List<?>, String>() {
+        Function function = new Function<List<?>, String>() {
             @Override
             public String apply(List<?> objects) {
                 String result = "";
                 for (Object object : objects) {
-                    result += object.toString();
+                    result += object;
                 }
                 return result;
             }
-        });
-        String result = "";
-        for (String s : localResults) {
-            result += s;
-        }
-        return result;
+        };
+        List<String> localResults = makeListWorkers(cnt, list, function);
+        return (String) function.apply(localResults);
     }
 
     @Override
@@ -112,24 +109,26 @@ public class IterativeParallelism implements ListIP {
 
     @Override
     public <T> T maximum(int cnt, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException {
-        List<T> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, T>() {
+        Function function = new Function<List<? extends T>, T>() {
             @Override
             public T apply(List<? extends T> ts) {
                 return ts.stream().max(comparator).get();
             }
-        });
-        return localResults.stream().max(comparator).get();
+        };
+        List<T> localResults = makeListWorkers(cnt, list, function);
+        return (T) function.apply(localResults);
     }
 
     @Override
     public <T> T minimum(int cnt, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException {
-        List<T> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, T>() {
+        Function function = new Function<List<? extends T>, T>() {
             @Override
             public T apply(List<? extends T> ts) {
                 return ts.stream().min(comparator).get();
             }
-        });
-        return localResults.stream().min(comparator).get();
+        };
+        List<T> localResults = makeListWorkers(cnt, list, function);
+        return (T) function.apply(localResults);
     }
 
     @Override
