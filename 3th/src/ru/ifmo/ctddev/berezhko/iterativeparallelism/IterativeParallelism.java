@@ -59,6 +59,15 @@ public class IterativeParallelism implements ListIP {
         return results;
     }
 
+    /**
+     * Transform {@code list} elements into one string (For example: {1, 2, -1} to "12-1")
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for transforming
+     * @return representation of {@code list}
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public String concat(int cnt, List<?> list) throws InterruptedException {
         Function function = new Function<List<?>, String>() {
@@ -75,6 +84,17 @@ public class IterativeParallelism implements ListIP {
         return (String) function.apply(localResults);
     }
 
+    /**
+     * Add to new list elements which returns true on {@code predicate}
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for filtering
+     * @param predicate predicate for filtering
+     * @param <T> type of elements
+     * @return new filtered list
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T> List<T> filter(int cnt, List<? extends T> list, Predicate<? super T> predicate) throws InterruptedException {
         List<List<T>> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, List<T>>() {
@@ -89,6 +109,18 @@ public class IterativeParallelism implements ListIP {
         return result;
     }
 
+    /**
+     * Applies {@code function} to a all elements of list and adds this elements to new list
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for mapping
+     * @param function function for mapping
+     * @param <T> type of elements
+     * @param <U> type of elements after applying
+     * @return new mapped list
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T, U> List<U> map(int cnt, List<? extends T> list, Function<? super T, ? extends U> function) throws InterruptedException {
         List<List<U>> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, List<U>>() {
@@ -103,6 +135,17 @@ public class IterativeParallelism implements ListIP {
         return result;
     }
 
+    /**
+     * Returns maximum of {@code list}'s elements using {@code comparator}
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for searching
+     * @param comparator comparator of elements
+     * @param <T> type of elements
+     * @return maximum in {@code list}
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T> T maximum(int cnt, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException {
         Function function = new Function<List<? extends T>, T>() {
@@ -115,6 +158,17 @@ public class IterativeParallelism implements ListIP {
         return (T) function.apply(localResults);
     }
 
+    /**
+     * Returns minimum of {@code list}'s elements using {@code comparator}
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for searching
+     * @param comparator comparator of elements
+     * @param <T> type of elements
+     * @return minimum in {@code list}
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T> T minimum(int cnt, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException {
         Function function = new Function<List<? extends T>, T>() {
@@ -127,6 +181,17 @@ public class IterativeParallelism implements ListIP {
         return (T) function.apply(localResults);
     }
 
+    /**
+     * Check that all elements of {@code list} returns true after applying to {@code predicate}
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for checking
+     * @param predicate predicate for checking
+     * @param <T> type of elements
+     * @return {@code true} if all elements return true after applying and {@code false} otherwise
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T> boolean all(int cnt, List<? extends T> list, Predicate<? super T> predicate) throws InterruptedException {
         List<Boolean> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, Boolean>() {
@@ -143,6 +208,17 @@ public class IterativeParallelism implements ListIP {
         });
     }
 
+    /**
+     * Check that any element of {@code list} returns true after applying to {@code predicate}
+     * <p>Function uses {@code cnt} threads for this
+     *
+     * @param cnt threads count
+     * @param list list for checking
+     * @param predicate predicate for checking
+     * @param <T> type of elements
+     * @return {@code true} if any element returns true after applying and {@code false} otherwise
+     * @throws InterruptedException if something gone wrong in some thread
+     */
     @Override
     public <T> boolean any(int cnt, List<? extends T> list, Predicate<? super T> predicate) throws InterruptedException {
         List<Boolean> localResults = makeListWorkers(cnt, list, new Function<List<? extends T>, Boolean>() {
