@@ -1,6 +1,7 @@
 package ru.ifmo.ctddev.berezhko.iterativeparallelism;
 
 import info.kgeorgiy.java.advanced.concurrent.ListIP;
+import info.kgeorgiy.java.advanced.mapper.ParallelMapper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,6 +14,12 @@ import java.util.stream.Collectors;
  * Created by root on 18.03.15.
  */
 public class IterativeParallelism implements ListIP {
+    private ParallelMapper mapper;
+
+    public IterativeParallelism(ParallelMapper mapper) {
+        this.mapper = mapper;
+    }
+
     private class MyRunnable<T, R> implements Runnable {
         private List<? extends T> list;
         private Function<List<? extends T>, R> function;
@@ -34,11 +41,10 @@ public class IterativeParallelism implements ListIP {
     }
 
     private <T, R> List<R> makeListWorkers(int cnt, List<? extends T> list, Function<List<? extends T>, R> function) throws InterruptedException {
-        Thread[] threads = new Thread[cnt];
-        MyRunnable[] runnables = new MyRunnable[cnt];
         if (list.size() < cnt) {
             cnt = list.size();
         }
+        List<List<? extends T>> args = new ArrayList<>();
         int elementsPerThread = list.size() / cnt;
         for (int i = 0; i < cnt; i++) {
             int firstIndex = i * elementsPerThread;
@@ -47,16 +53,10 @@ public class IterativeParallelism implements ListIP {
                 lastIndex = list.size();
             }
             List<? extends T> subList = list.subList(firstIndex, lastIndex);
-            runnables[i] = new MyRunnable<>(subList, function);
-            threads[i] = new Thread(runnables[i]);
-            threads[i].start();
+            args.add(subList);
         }
-        List<R> results = new ArrayList<>();
-        for (int i = 0; i < cnt; i++) {
-            threads[i].join();
-            results.add((R) runnables[i].getResult());
-        }
-        return results;
+        //System.out.println(function.apply(args.get(1)));
+        return mapper.map(function, args);
     }
 
     /**
