@@ -55,7 +55,6 @@ public class IterativeParallelism implements ListIP {
             List<? extends T> subList = list.subList(firstIndex, lastIndex);
             args.add(subList);
         }
-        //System.out.println(function.apply(args.get(1)));
         return mapper.map(function, args);
     }
 
@@ -70,18 +69,25 @@ public class IterativeParallelism implements ListIP {
      */
     @Override
     public String concat(int cnt, List<?> list) throws InterruptedException {
-        Function function = new Function<List<?>, String>() {
-            @Override
-            public String apply(List<?> objects) {
-                String result = "";
-                for (Object object : objects) {
-                    result += object;
-                }
-                return result;
-            }
-        };
-        List<String> localResults = makeListWorkers(cnt, list, function);
-        return (String) function.apply(localResults);
+//        Function function = new Function<List<?>, String>() {
+//            @Override
+//            public String apply(List<?> objects) {
+//                String result = "";
+//                for (Object object : objects) {
+//                    result += object;
+//                }
+//                return result;
+//            }
+//        };
+//        List<String> localResults = makeListWorkers(cnt, list, function);
+//        return (String) function.apply(localResults);
+        StringBuilder ans = new StringBuilder();
+        makeListWorkers(cnt, list, data -> {
+            StringBuilder result = new StringBuilder();
+            data.stream().map(Object::toString).forEach(result::append);
+            return result.toString();
+        }).forEach(ans::append);
+        return ans.toString();
     }
 
     /**

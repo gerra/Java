@@ -14,18 +14,49 @@ public class ParallelMapperImpl implements ParallelMapper {
     private int threadCount;
     private LinkedList<Runnable> queue;
     private Thread[] threads;
+    private volatile boolean isRunning;
 
+    /**
+     * Creates {@code threadCount} worker threads for parallel work
+     *
+     * @param threadCount count of worker thread
+     */
     public ParallelMapperImpl(int threadCount) {
         this.threadCount = threadCount;
-        threads = new MyThread[threadCount];
+        threads = new Thread[threadCount];
         queue = new LinkedList<>();
-
+        isRunning = true;
         for (int i = 0; i < threadCount; i++) {
-            threads[i] = new MyThread();
+            threads[i] = new Thread(() -> {
+                Runnable r;
+                while (isRunning && !Thread.currentThread().isInterrupted()) {
+                    synchronized (queue) {
+                        while (queue.isEmpty()) {
+                            try {
+                                queue.wait();
+                            } catch (InterruptedException e) {
+                                return;
+                            }
+                        }
+                        r = queue.removeFirst();
+                    }
+                    r.run();
+                }
+            });
             threads[i].start();
         }
     }
 
+    /**
+     * Get list and function and returns list of results of function applying to every element of the list
+     *
+     * @param function function for applying
+     * @param list list of arguments to apply
+     * @param <T> type of the function argument and the list elements
+     * @param <R> type of the function returning result
+     * @return list of applying results to every element of {@code list}
+     * @throws InterruptedException if any thread interrupted the current thread before or while the current thread was working
+     */
     @Override
     public <T, R> List<R> map(Function<? super T, ? extends R> function, List<? extends T> list) throws InterruptedException {
         MyRunnable[] runnables = new MyRunnable[list.size()];
@@ -49,17 +80,23 @@ public class ParallelMapperImpl implements ParallelMapper {
         return results;
     }
 
+    /**
+     * Stops all worker threads
+     *
+     * @throws InterruptedException if any thread interrupted the current thread before or while the current thread was working
+     */
     @Override
     public void close() throws InterruptedException {
         for (int i = 0; i < threadCount; i++) {
             threads[i].interrupt();
         }
+        isRunning = false;
     }
 
     private class MyRunnable<T, R> implements Runnable {
         private T argument;
         private Function<? super T, ? extends R> function;
-        private R result;
+        /*volatile*/ private R result;
 
         public MyRunnable(T argument, Function<? super T, ? extends R> function) {
             this.argument = argument;
@@ -76,25 +113,6 @@ public class ParallelMapperImpl implements ParallelMapper {
 
         public R getResult() {
             return result;
-        }
-    }
-
-    private class MyThread extends Thread {
-        @Override
-        public void run() {
-            Runnable r;
-            while (true) {
-                synchronized (queue) {
-                    while (queue.isEmpty()) {
-                        try {
-                            queue.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                    r = queue.removeFirst();
-                }
-                r.run();
-            }
         }
     }
 }
