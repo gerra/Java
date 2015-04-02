@@ -20,6 +20,10 @@ public class IterativeParallelism implements ListIP {
         this.mapper = mapper;
     }
 
+    public IterativeParallelism() {
+        mapper = null;
+    }
+
     private class MyRunnable<T, R> implements Runnable {
         private List<? extends T> list;
         private Function<List<? extends T>, R> function;
@@ -40,7 +44,36 @@ public class IterativeParallelism implements ListIP {
         }
     }
 
+    private <T, R> List<R> makeListWorkersWithoutMapper(int cnt, List<? extends T> list, Function<List<? extends T>, R> function) throws InterruptedException {
+        Thread[] threads = new Thread[cnt];
+        MyRunnable[] runnables = new MyRunnable[cnt];
+        if (list.size() < cnt) {
+            cnt = list.size();
+        }
+        int elementsPerThread = list.size() / cnt;
+        for (int i = 0; i < cnt; i++) {
+            int firstIndex = i * elementsPerThread;
+            int lastIndex = firstIndex + elementsPerThread;
+            if (i == cnt - 1 && lastIndex < list.size()) {
+                lastIndex = list.size();
+            }
+            List<? extends T> subList = list.subList(firstIndex, lastIndex);
+            runnables[i] = new MyRunnable<>(subList, function);
+            threads[i] = new Thread(runnables[i]);
+            threads[i].start();
+        }
+        List<R> results = new ArrayList<>();
+        for (int i = 0; i < cnt; i++) {
+            threads[i].join();
+            results.add((R) runnables[i].getResult());
+        }
+        return results;
+    }
+
     private <T, R> List<R> makeListWorkers(int cnt, List<? extends T> list, Function<List<? extends T>, R> function) throws InterruptedException {
+        if (mapper == null) {
+            return makeListWorkersWithoutMapper(cnt, list, function);
+        }
         if (list.size() < cnt) {
             cnt = list.size();
         }
@@ -69,18 +102,6 @@ public class IterativeParallelism implements ListIP {
      */
     @Override
     public String concat(int cnt, List<?> list) throws InterruptedException {
-//        Function function = new Function<List<?>, String>() {
-//            @Override
-//            public String apply(List<?> objects) {
-//                String result = "";
-//                for (Object object : objects) {
-//                    result += object;
-//                }
-//                return result;
-//            }
-//        };
-//        List<String> localResults = makeListWorkers(cnt, list, function);
-//        return (String) function.apply(localResults);
         StringBuilder ans = new StringBuilder();
         makeListWorkers(cnt, list, data -> {
             StringBuilder result = new StringBuilder();
