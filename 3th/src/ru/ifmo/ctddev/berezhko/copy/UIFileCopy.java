@@ -1,14 +1,19 @@
 package ru.ifmo.ctddev.berezhko.copy;
 
+import com.sun.istack.internal.NotNull;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class UIFileCopy implements PropertyChangeListener {
     public static final String passedTimePrefix = "Времени прошло: ";
@@ -17,10 +22,16 @@ public class UIFileCopy implements PropertyChangeListener {
     public static final String averageSpeedPrefix = "Средняя скорость: ";
     public static final String speedUnit = " МБ/сек";
 
+    private static final String fileDoesNotExistFormat = "Файл %s не существует";
+
     private static final int BORDER = 5;
+
+    private String sourcePathString;
+    private String destinationPathString;
 
     private File sourceFile;
     private File destinationFile;
+
     private Copier copier;
 
     private JFrame mainWindow;
@@ -32,9 +43,10 @@ public class UIFileCopy implements PropertyChangeListener {
     private JTextField currentSpeedView;
     private JTextField averageSpeedView;
 
-    public UIFileCopy(File sourceFile, File destinationFile) {
-        this.sourceFile = sourceFile;
-        this.destinationFile = destinationFile;
+
+    public UIFileCopy(@NotNull String sourcePathString, @NotNull String destinationPathString) {
+        this.sourcePathString = sourcePathString;
+        this.destinationPathString = destinationPathString;
     }
 
     public static String getTimeAsString(long millis) {
@@ -73,10 +85,50 @@ public class UIFileCopy implements PropertyChangeListener {
         }
     }
 
+    private void createFiles() {
+        Path sourcePath = Paths.get(sourcePathString);
+        sourceFile = sourcePath.toFile();
+        if (!sourceFile.exists()) {
+            String error = String.format(fileDoesNotExistFormat, sourceFile.getAbsolutePath());
+            System.err.println("Source file " + sourcePathString + " doesn't exist");
+            showErrorInMainWindow(error);
+        }
 
+        Path destinationPath = Paths.get(destinationPathString);
+        destinationFile = destinationPath.toFile();
+        if (destinationFile.exists() && destinationFile.isDirectory()) {
+            String path = destinationPathString + "/" + sourcePath.getName(sourcePath.getNameCount() - 1);
+            destinationPath = Paths.get(path);
+            destinationFile = destinationPath.toFile();
+            try {
+                destinationFile.createNewFile();
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                showErrorInMainWindow("Невозможно скопировать в " + path);
+                System.exit(1);
+            }
+        }
+        if (!destinationFile.exists()) {
+            try {
+                destinationFile.createNewFile();
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                showErrorInMainWindow("Невозможно скопировать в "
+                        + destinationFile.getAbsolutePath()
+                        + ". Данного файла или директории не существует");
+            }
+        }
+
+
+        if (!destinationFile.exists()) {
+            String error = String.format(fileDoesNotExistFormat, destinationPathString);
+            System.err.println("Destination file " + destinationFile.getAbsolutePath() + " doesn't exist");
+            showErrorInMainWindow(error);
+        }
+    }
 
     private void startCopying() {
-        SwingUtilities.invokeLater(() ->{
+        SwingUtilities.invokeLater(() -> {
             mainWindow = new JFrame("UIFileCopy");
             mainWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -101,9 +153,6 @@ public class UIFileCopy implements PropertyChangeListener {
 
             averageSpeedView = new JTextField(averageSpeedPrefix);
             averageSpeedView.setEditable(false);
-
-            copier = new Copier(sourceFile, destinationFile, this);
-            copier.addPropertyChangeListener(this);
 
             JButton cancelButton = new JButton("Отмена");
             cancelButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -133,7 +182,11 @@ public class UIFileCopy implements PropertyChangeListener {
 
             mainWindow.setVisible(true);
 
+            createFiles();
+
             try {
+                copier = new Copier(sourceFile, destinationFile, this);
+                copier.addPropertyChangeListener(this);
                 copier.execute();
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -141,19 +194,17 @@ public class UIFileCopy implements PropertyChangeListener {
         });
     }
 
+    public void showErrorInMainWindow(String error) {
+        JOptionPane.showMessageDialog(mainWindow, error, "Ошибка", JOptionPane.ERROR_MESSAGE);
+        closeWindow();
+    }
+
     public static void main(String[] args) {
-        Path sourcePath = Paths.get(args[0]);
-        Path destinationPath = Paths.get(args[1]);
-
-        File sourceFile = sourcePath.toFile();
-        File destinationFile = destinationPath.toFile();
-
-        if (destinationFile.exists() && destinationFile.isDirectory()) {
-            String path = args[1] + "/" + sourcePath.getName(sourcePath.getNameCount() - 1);
-            destinationPath = Paths.get(path);
-            destinationFile = destinationPath.toFile();
+        if (args == null || args.length < 2 || Arrays.stream(args).anyMatch(Predicate.isEqual(null))) {
+            System.err.println("Usage: UIFileCopy <source> <destination>");
+            System.exit(1);
         }
-        UIFileCopy copier = new UIFileCopy(sourceFile, destinationFile);
+        UIFileCopy copier = new UIFileCopy(args[0], args[1]);
         copier.startCopying();
     }
 }

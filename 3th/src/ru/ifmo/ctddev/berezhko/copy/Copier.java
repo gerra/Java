@@ -9,7 +9,6 @@ import java.util.List;
 
 
 public class Copier extends SwingWorker<Void, Copier.Result> {
-
     public class Result {
         private long currentSpeed;
         private long averageSpeed;
@@ -51,13 +50,14 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
 
     @Override
     protected Void doInBackground() throws Exception {
+        System.out.println(String.format("Copying from %s to %s", sourceFile.getCanonicalPath(), destinationFile.getCanonicalPath()));
+        Result result = new Result();
+        publish(result);
         long sourceSize = sourceFile.length();
         try (
                 FileInputStream is = new FileInputStream(sourceFile);
                 FileOutputStream os = new FileOutputStream(destinationFile);
                 MyTimer timer = new MyTimer(uiFileCopy)) {
-            System.out.println(String.format("Copying from %s to %s", sourceFile.getCanonicalPath(), destinationFile.getCanonicalPath()));
-
             byte[] buf = new byte[1024];
             setProgress(0);
             timer.execute();
@@ -75,8 +75,6 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
             long totalPassed = 0;
             long averageSpeed;
 
-            Result result = new Result();
-            publish(result);
             while (!isCancelled() && (length = is.read(buf)) > 0) {
                 os.write(buf, 0, length);
                 time2 = System.currentTimeMillis();
@@ -104,7 +102,8 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
             }
             timer.cancel(true);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            uiFileCopy.showErrorInMainWindow(e.getLocalizedMessage());
         }
         return null;
     }
