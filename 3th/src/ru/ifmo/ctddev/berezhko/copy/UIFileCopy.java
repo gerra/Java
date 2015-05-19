@@ -12,9 +12,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+import static ru.ifmo.ctddev.berezhko.copy.Utils.getTimeAsString;
+
+/**
+ * This class implements files copying with graphical user interface
+ */
 public class UIFileCopy implements PropertyChangeListener {
     public static final String passedTimePrefix = "Времени прошло: ";
     public static final String remainingTimePrefix = "Времени осталось: ";
@@ -43,40 +47,67 @@ public class UIFileCopy implements PropertyChangeListener {
     private JTextField currentSpeedView;
     private JTextField averageSpeedView;
 
-
+    /**
+     * Create instance of UIFileCopy
+     *
+     * @param sourcePathString describes path to source file
+     * @param destinationPathString describes path to destination file (or folder)
+     */
     public UIFileCopy(@NotNull String sourcePathString, @NotNull String destinationPathString) {
         this.sourcePathString = sourcePathString;
         this.destinationPathString = destinationPathString;
     }
 
-    public static String getTimeAsString(long millis) {
-        return String.format("%d мин, %d сек",
-                TimeUnit.MILLISECONDS.toMinutes(millis),
-                TimeUnit.MILLISECONDS.toSeconds(millis) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-        );
-    }
-
+    /**
+     * Update information about passed time
+     *
+     * @param millis passed time in milliseconds
+     */
     public void updatePassedTime(long millis) {
         passedTimeView.setText(passedTimePrefix + getTimeAsString(millis));
     }
 
+    /**
+     * Update information about remaining time
+     *
+     * @param millis remained time in milliseconds
+     */
     public void updateRemainingTime(long millis) {
         remainingTimeView.setText(remainingTimePrefix + getTimeAsString(millis));
     }
 
+    /**
+     * Update information about current downloading speed
+     *
+     * @param speed current downloading speed
+     */
     public void updateCurrentSpeed(long speed) {
         currentSpeedView.setText(currentSpeedPrefix + speed + speedUnit);
     }
 
+    /**
+     * Update information about average downloading speed
+     *
+     * @param speed average downloading speed
+     */
     public void updateAverageSpeed(long speed) {
         averageSpeedView.setText(averageSpeedPrefix + speed + speedUnit);
     }
 
+    /**
+     * Close main window and stop copying
+     */
     public void closeWindow() {
+        progressBar.setValue(100);
         mainWindow.dispatchEvent(new WindowEvent(mainWindow, WindowEvent.WINDOW_CLOSING));
     }
 
+    /**
+     * Used by {@link ru.ifmo.ctddev.berezhko.copy.Copier} Copier for update progress bar status
+     *
+     * @param evt property change event
+     * @see ru.ifmo.ctddev.berezhko.copy.Copier
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName() == "progress") {
@@ -93,10 +124,9 @@ public class UIFileCopy implements PropertyChangeListener {
             System.err.println("Source file " + sourcePathString + " doesn't exist");
             showErrorInMainWindow(error);
         }
-
         Path destinationPath = Paths.get(destinationPathString);
         destinationFile = destinationPath.toFile();
-        if (destinationFile.exists() && destinationFile.isDirectory()) {
+        if (destinationFile.exists() && destinationFile.isDirectory() && !sourceFile.isDirectory()) {
             String path = destinationPathString + "/" + sourcePath.getName(sourcePath.getNameCount() - 1);
             destinationPath = Paths.get(path);
             destinationFile = destinationPath.toFile();
@@ -194,16 +224,29 @@ public class UIFileCopy implements PropertyChangeListener {
         });
     }
 
+    /**
+     * Show error message in MessageDialog in main window
+     *
+     * @param error message
+     * @see javax.swing.JOptionPane#showMessageDialog
+     */
     public void showErrorInMainWindow(String error) {
         JOptionPane.showMessageDialog(mainWindow, error, "Ошибка", JOptionPane.ERROR_MESSAGE);
         closeWindow();
     }
 
+    /**
+     * Start copying from args[0] to args[1]
+     *
+     * @param args path of source and destination file
+     * @see ru.ifmo.ctddev.berezhko.copy.UIFileCopy
+     */
     public static void main(String[] args) {
         if (args == null || args.length < 2 || Arrays.stream(args).anyMatch(Predicate.isEqual(null))) {
             System.err.println("Usage: UIFileCopy <source> <destination>");
             System.exit(1);
         }
+
         UIFileCopy copier = new UIFileCopy(args[0], args[1]);
         copier.startCopying();
     }

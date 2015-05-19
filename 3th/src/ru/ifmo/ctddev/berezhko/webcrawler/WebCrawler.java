@@ -88,7 +88,7 @@ public class WebCrawler implements Crawler {
         try {
             mainSemaphore.acquire(Integer.MAX_VALUE);
         } catch (InterruptedException e) {
-            //
+            e.printStackTrace();
         }
         List<String> links = visited.keySet().stream().collect(Collectors.toList());
         return new Result(links, exceptions);
@@ -101,6 +101,7 @@ public class WebCrawler implements Crawler {
         try {
             if (!queue.isEmpty()) {
                 Pair<String, Integer> cur = queue.poll();
+               // System.out.println(cur);
                 String url = cur.getKey();
                 int depth = cur.getValue();
                 if (!visited.containsKey(url) && !exceptions.containsKey(url)) {
@@ -111,7 +112,6 @@ public class WebCrawler implements Crawler {
                             visited.put(url, new Object());
                             try {
                                 Document document = downloader.download(url);
-
                                 mainSemaphore.acquire();
                                 extractorService.submit(() -> extract(document, depth, visited, queue, availableHosts, mainSemaphore));
                             } catch (IOException e) {
@@ -119,7 +119,7 @@ public class WebCrawler implements Crawler {
                                 System.err.println("Unable to download document");
                                 exceptions.put(url, e);
                             } catch (InterruptedException e) {
-                                //
+                                e.printStackTrace();
                             } finally {
                                 availableHosts.get(host).release();
                                 if (!queue.isEmpty()) {
@@ -127,18 +127,12 @@ public class WebCrawler implements Crawler {
                                         mainSemaphore.acquire();
                                         downloaderService.submit(() -> download(visited, queue, availableHosts, mainSemaphore));
                                     } catch (InterruptedException e) {
-                                        //
+                                        e.printStackTrace();
                                     }
                                 }
                             }
                         } else {
                             queue.add(cur);
-                            try {
-                                mainSemaphore.acquire();
-                                downloaderService.submit(() -> download(visited, queue, availableHosts, mainSemaphore));
-                            } catch (InterruptedException e) {
-                                //
-                            }
 
                         }
                     } catch (MalformedURLException e) {
@@ -166,7 +160,7 @@ public class WebCrawler implements Crawler {
                         mainSemaphore.acquire();
                         downloaderService.submit(() -> download(visited, queue, availableHosts, mainSemaphore));
                     } catch (InterruptedException e) {
-                        //
+                        e.printStackTrace();
                     }
                 });
             }
