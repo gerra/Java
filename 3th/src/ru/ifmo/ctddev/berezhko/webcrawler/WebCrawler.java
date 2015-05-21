@@ -11,6 +11,11 @@ import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * Class for downloading and extracting urls with abilities of downloaders count,
+ * extractors count, maximum downloads per host and depth of downloading setting
+ * @see info.kgeorgiy.java.advanced.crawler.Crawler
+ */
 public class WebCrawler implements Crawler {
     private Downloader downloader;
     private int downloaders;
@@ -21,22 +26,31 @@ public class WebCrawler implements Crawler {
     private ExecutorService extractorService;
     private ConcurrentMap<String, IOException> exceptions;
 
+    /**
+     * Download and extract webpages from {@code args[0]} using {@code args[1]} downloaders,
+     * {@code args[2]} extractors and with {@code args[3]} available downloads per host
+     *
+     * @param args {@code args[0]} - url
+     *             {@code args[1]} - downloaders count
+     *             {@code args[2]} - extractors count
+     *             {@code args[3]} - maximum downloads per host
+     */
     public static void main(String args[]) {
-        if (args == null || args.length != 4 || Arrays.stream(args).anyMatch(Predicate.isEqual(null))) {
+        if (args == null || args.length > 4 || Arrays.stream(args).anyMatch(Predicate.isEqual(null))) {
             System.err.println("Check arguments count");
             return;
         }
         String url = args[0];
         int downloaders = 50;
         int extractors = 50;
-        if (args.length >= 1) {
+        if (args.length > 1) {
             downloaders = Integer.parseInt(args[1]);
         }
-        if (args.length >= 2) {
+        if (args.length > 2) {
             extractors = Integer.parseInt(args[2]);
         }
         int perHost = downloaders;
-        if (args.length >= 3) {
+        if (args.length > 3) {
             perHost = Integer.parseInt(args[3]);
         }
         try (Crawler crawler = new WebCrawler(
@@ -52,6 +66,16 @@ public class WebCrawler implements Crawler {
 
     }
 
+    /**
+     * Create instance of {@link ru.ifmo.ctddev.berezhko.webcrawler.WebCrawler} for downloading
+     * and extractors urls
+     *
+     * @param downloader interface for downloading pages
+     * @param downloaders downloaders count
+     * @param extractors extractors count
+     * @param perHost maximum downloads per host
+     * @see info.kgeorgiy.java.advanced.crawler.Downloader
+     */
     public WebCrawler(Downloader downloader, int downloaders, int extractors, int perHost) {
         this.downloader = downloader;
         this.downloaders = downloaders;
@@ -59,6 +83,15 @@ public class WebCrawler implements Crawler {
         this.perHost = perHost;
     }
 
+    /**
+     * Download and extract document from url and all urls which are less than depth from {@code url}
+     *
+     * @param url url for download
+     * @param depth depth of downloading
+     * @return {@code result} contains of downloaded documents and all exceptions, occurred during
+     *                          downloading and extracting
+     * @see info.kgeorgiy.java.advanced.crawler.Result
+     */
     @Override
     public Result download(String url, int depth) {
         if (depth == 0) {
@@ -171,6 +204,10 @@ public class WebCrawler implements Crawler {
         }
     }
 
+    /**
+     * Interrupt downloading and extracting
+     * @see java.lang.AutoCloseable
+     */
     @Override
     public void close() {
         stopService(extractorService);
