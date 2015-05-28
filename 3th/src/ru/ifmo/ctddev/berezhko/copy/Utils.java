@@ -1,6 +1,9 @@
 package ru.ifmo.ctddev.berezhko.copy;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 public class Utils {
@@ -11,14 +14,26 @@ public class Utils {
      * @return size of file or directory {@code dirOrFile}
      */
     public static long dirOrFileSize(File dirOrFile) {
-        if (!dirOrFile.isDirectory()) {
-            return dirOrFile.length();
+        final long[] length = {0};
+        try {
+            Files.walk(Paths.get(dirOrFile.getAbsolutePath()))
+                    .filter(Files::isRegularFile)
+                    .forEach(filePath -> {
+                        File file = filePath.toFile();
+                        length[0] += file.length();
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        long length = 0;
-        for (File file : dirOrFile.listFiles()) {
-            length += dirOrFileSize(file);
-        }
-        return length;
+
+//        if (!dirOrFile.isDirectory()) {
+//            return dirOrFile.length();
+//        }
+//
+//        for (File file : dirOrFile.listFiles()) {
+//            length[0] += dirOrFileSize(file);
+//        }
+        return length[0];
     }
 
     /**

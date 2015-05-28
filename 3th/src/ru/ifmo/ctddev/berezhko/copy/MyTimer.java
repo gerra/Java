@@ -33,7 +33,7 @@ public class MyTimer extends SwingWorker<Void, Long> implements AutoCloseable {
     @Override
     protected void process(List<Long> chunks) {
         if (chunks.size() > 0) {
-            uiFileCopy.updatePassedTime(chunks.get(0));
+            uiFileCopy.updatePassedTime(chunks.get(chunks.size() - 1));
         }
     }
 

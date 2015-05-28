@@ -42,6 +42,7 @@ public class UIFileCopy implements PropertyChangeListener {
 
     private JProgressBar progressBar;
 
+    private JTextField currentFileView;
     private JTextField passedTimeView;
     private JTextField remainingTimeView;
     private JTextField currentSpeedView;
@@ -59,6 +60,18 @@ public class UIFileCopy implements PropertyChangeListener {
     }
 
     /**
+     * Update info about copying
+     *
+     * @param result result of copying
+     */
+    public void updateInfo(Copier.Result result) {
+        currentFileView.setText(result.getCurrentFile());
+        remainingTimeView.setText(remainingTimePrefix + getTimeAsString(result.getRemainingTime()));
+        currentSpeedView.setText(currentSpeedPrefix + result.getCurrentSpeed() + speedUnit);
+        averageSpeedView.setText(averageSpeedPrefix + result.getAverageSpeed() + speedUnit);
+    }
+
+    /**
      * Update information about passed time
      *
      * @param millis passed time in milliseconds
@@ -67,32 +80,6 @@ public class UIFileCopy implements PropertyChangeListener {
         passedTimeView.setText(passedTimePrefix + getTimeAsString(millis));
     }
 
-    /**
-     * Update information about remaining time
-     *
-     * @param millis remained time in milliseconds
-     */
-    public void updateRemainingTime(long millis) {
-        remainingTimeView.setText(remainingTimePrefix + getTimeAsString(millis));
-    }
-
-    /**
-     * Update information about current downloading speed
-     *
-     * @param speed current downloading speed
-     */
-    public void updateCurrentSpeed(long speed) {
-        currentSpeedView.setText(currentSpeedPrefix + speed + speedUnit);
-    }
-
-    /**
-     * Update information about average downloading speed
-     *
-     * @param speed average downloading speed
-     */
-    public void updateAverageSpeed(long speed) {
-        averageSpeedView.setText(averageSpeedPrefix + speed + speedUnit);
-    }
 
     /**
      * Close main window and stop copying
@@ -172,17 +159,25 @@ public class UIFileCopy implements PropertyChangeListener {
             progressBar.setValue(0);
             progressBar.setStringPainted(true);
 
+            currentFileView = new JTextField("Подготовка к копированию...");
+            currentFileView.setEditable(false);
+            currentFileView.setHorizontalAlignment(JTextField.CENTER);
+
             passedTimeView = new JTextField(passedTimePrefix);
             passedTimeView.setEditable(false);
+            passedTimeView.setHorizontalAlignment(JTextField.CENTER);
 
             remainingTimeView = new JTextField(remainingTimePrefix);
             remainingTimeView.setEditable(false);
+            remainingTimeView.setHorizontalAlignment(JTextField.CENTER);
 
             currentSpeedView = new JTextField(currentSpeedPrefix);
             currentSpeedView.setEditable(false);
+            currentSpeedView.setHorizontalAlignment(JTextField.CENTER);
 
             averageSpeedView = new JTextField(averageSpeedPrefix);
             averageSpeedView.setEditable(false);
+            averageSpeedView.setHorizontalAlignment(JTextField.CENTER);
 
             JButton cancelButton = new JButton("Отмена");
             cancelButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -193,6 +188,7 @@ public class UIFileCopy implements PropertyChangeListener {
             });
 
             panel.add(progressBar);
+            panel.add(currentFileView);
             panel.add(passedTimeView);
             panel.add(remainingTimeView);
             panel.add(currentSpeedView);
@@ -204,12 +200,11 @@ public class UIFileCopy implements PropertyChangeListener {
             mainWindow.getContentPane().setLayout(new BorderLayout());
             mainWindow.getContentPane().add(panel, BorderLayout.CENTER);
 
-            mainWindow.setResizable(false);
-            mainWindow.setPreferredSize(new Dimension(260, 150));
+//            mainWindow.setResizable(false);
+//            mainWindow.setPreferredSize(new Dimension(260, 150));
+            mainWindow.setMinimumSize(new Dimension(300, 180));
             mainWindow.pack();
             mainWindow.setLocationRelativeTo(null);
-            mainWindow.setVisible(true);
-
             mainWindow.setVisible(true);
 
             createFiles();

@@ -21,6 +21,7 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
         private long currentSpeed;
         private long averageSpeed;
         private long remainingTime;
+        private String currentFile;
 
         public void setCurrentSpeed(long currentSpeed) {
             this.currentSpeed = currentSpeed;
@@ -45,12 +46,28 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
         public void setRemainingTime(long remainingTime) {
             this.remainingTime = remainingTime;
         }
+
+        public String getCurrentFile() {
+            return currentFile;
+        }
+
+        public void setCurrentFile(String currentFile) {
+            this.currentFile = currentFile;
+        }
     }
 
     private File sourceFile, destinationFile;
     private UIFileCopy uiFileCopy;
     private long sourceSize;
+    private long totalCopied;
     private Result result;
+    long remainingTime;
+
+    long lengthForSec = 0;
+    long currentSpeed;
+
+    long totalPassed = 0;
+    long averageSpeed;
 
     /**
      * Create copier
@@ -74,27 +91,17 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
             if (!destinationFile.exists()) {
                 destinationFile.createNewFile();
             }
+            result.setCurrentFile(sourceFile.getName());
+//            result.setCurrentFile(sourceFile.getPath());
+            publish(result);
             try (
                     FileInputStream is = new FileInputStream(sourceFile);
-                    FileOutputStream os = new FileOutputStream(destinationFile);
-                    MyTimer timer = new MyTimer(uiFileCopy)) {
+                    FileOutputStream os = new FileOutputStream(destinationFile)) {
                 byte[] buf = new byte[1024];
-                setProgress(0);
-                timer.execute();
-                int length;
 
                 long time1 = System.currentTimeMillis();
                 long time2;
-
-                long remainingTime;
-
-                long lengthForSec = 0;
-                long currentSpeed;
-
-                long totalCopied = 0;
-                long totalPassed = 0;
-                long averageSpeed;
-
+                int length;
                 while (!isCancelled() && (length = is.read(buf)) > 0) {
                     os.write(buf, 0, length);
                     time2 = System.currentTimeMillis();
@@ -120,7 +127,6 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
                     totalCopied += length;
                     setProgress((int) (100.0 * totalCopied / sourceSize));
                 }
-                timer.cancel(true);
             } catch (IOException e) {
                 System.err.println(e.getMessage());
                 uiFileCopy.showErrorInMainWindow(e.getLocalizedMessage());
@@ -138,11 +144,14 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
 
     @Override
     protected Void doInBackground() throws Exception {
-        System.out.println(String.format("Copying from %s to %s", sourceFile.getCanonicalPath(), destinationFile.getCanonicalPath()));
+        System.out.println(String.format("Copying %s to %s", sourceFile.getCanonicalPath(), destinationFile.getCanonicalPath()));
         result = new Result();
         publish(result);
         sourceSize = Utils.dirOrFileSize(sourceFile);
-        copyRecursively(sourceFile, destinationFile);
+        try (MyTimer timer = new MyTimer(uiFileCopy)) {
+            timer.execute();
+            copyRecursively(sourceFile, destinationFile);
+        }
         return null;
     }
 
@@ -150,9 +159,7 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
     protected void process(List<Result> chunks) {
         if (chunks.size() > 0) {
             Result result = chunks.get(chunks.size() - 1);
-            uiFileCopy.updateAverageSpeed(result.getAverageSpeed());
-            uiFileCopy.updateCurrentSpeed(result.getCurrentSpeed());
-            uiFileCopy.updateRemainingTime(result.getRemainingTime());
+            uiFileCopy.updateInfo(result);
         }
     }
 
