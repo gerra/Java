@@ -84,7 +84,7 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
 
     private void copyRecursively(File sourceFile, File destinationFile) throws Exception {
         //System.out.println(destinationFile.getAbsolutePath());
-
+        //System.out.println(sourceFile.getName());
         if (!sourceFile.isDirectory()) {
             Path sourcePath = Paths.get(sourceFile.getAbsolutePath());
             destinationFile = Paths.get(destinationFile.getAbsolutePath() + "/" + sourcePath.getName(sourcePath.getNameCount() - 1)).toFile();
@@ -135,6 +135,9 @@ public class Copier extends SwingWorker<Void, Copier.Result> {
             Path sourcePath = Paths.get(sourceFile.getAbsolutePath());
             String path = destinationFile.getAbsolutePath() + "/" + sourcePath.getName(sourcePath.getNameCount() - 1) + "/";
             File newDestFile = Paths.get(path).toFile();
+            if (newDestFile.exists() && !newDestFile.isDirectory()) {
+                newDestFile.delete();
+            }
             newDestFile.mkdir();
             for (File file : sourceFile.listFiles()) {
                 copyRecursively(file, newDestFile);
